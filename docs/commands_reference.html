@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FPGA Toolchain Commands</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Mono', 'Fira Code', monospace;
+            background: #0d1117;
+            color: #c9d1d9;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #58a6ff;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 0.5rem;
+        }
+        .subtitle {
+            color: #8b949e;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+        h2 {
+            color: #79c0ff;
+            font-size: 1.2rem;
+            margin-top: 2rem;
+            margin-bottom: 0.8rem;
+            padding: 0.3rem 0.6rem;
+            background: #161b22;
+            border-left: 3px solid #58a6ff;
+        }
+        .step-number {
+            display: inline-block;
+            background: #58a6ff;
+            color: #0d1117;
+            width: 1.5rem;
+            height: 1.5rem;
+            text-align: center;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 0.85rem;
+            line-height: 1.5rem;
+            margin-right: 0.4rem;
+        }
+        pre {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 0.6rem 0 1rem 0;
+            overflow-x: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        .cmd {
+            color: #7ee787;
+        }
+        .comment {
+            color: #8b949e;
+        }
+        .flag {
+            color: #f0883e;
+        }
+        p {
+            margin: 0.4rem 0;
+        }
+        .note {
+            background: #1c2128;
+            border: 1px solid #f0883e;
+            border-radius: 6px;
+            padding: 0.8rem 1rem;
+            margin: 0.8rem 0;
+            font-size: 0.85rem;
+        }
+        .note strong { color: #f0883e; }
+        .success {
+            border-color: #3fb950;
+        }
+        .success strong { color: #3fb950; }
+        .danger {
+            border-color: #f85149;
+        }
+        .danger strong { color: #f85149; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0.8rem 0;
+            font-size: 0.85rem;
+        }
+        th {
+            background: #161b22;
+            color: #58a6ff;
+            text-align: left;
+            padding: 0.5rem 0.8rem;
+            border: 1px solid #30363d;
+        }
+        td {
+            padding: 0.5rem 0.8rem;
+            border: 1px solid #30363d;
+        }
+        .workflow {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 1rem 0;
+        }
+        .workflow-step {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+        }
+        .workflow-arrow {
+            color: #58a6ff;
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+
+<h1>FPGA Toolchain Commands</h1>
+<p class="subtitle">Step-by-step commands for each phase of the workflow. Run these from the project root: <code>~/projects/fpga-face/</code></p>
+
+<div class="workflow">
+    <div class="workflow-step">Write Verilog</div>
+    <span class="workflow-arrow">→</span>
+    <div class="workflow-step">Lint</div>
+    <span class="workflow-arrow">→</span>
+    <div class="workflow-step">Simulate</div>
+    <span class="workflow-arrow">→</span>
+    <div class="workflow-step">Waveforms</div>
+    <span class="workflow-arrow">→</span>
+    <div class="workflow-step">Resources</div>
+    <span class="workflow-arrow">→</span>
+    <div class="workflow-step">Commit</div>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<h2><span class="step-number">1</span> Write Verilog</h2>
+
+<p>Create/edit your <code>.v</code> files in VS Code.</p>
+
+<pre><span class="comment"># Your Verilog goes in rtl/</span>
+<span class="cmd">code</span> rtl/mac_unit.v</pre>
+
+<div class="note">
+    <strong>Tip:</strong> Keep the Verilog reference (<code>docs/verilog_reference.html</code>) open in a browser tab while coding.
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<h2><span class="step-number">2</span> Lint (Verilator)</h2>
+
+<p>Catches syntax errors, width mismatches, unsigned/signed issues, unused signals. Run this BEFORE simulating.</p>
+
+<pre><span class="comment"># Lint a single file</span>
+<span class="cmd">verilator</span> <span class="flag">--lint-only -Wall</span> rtl/mac_unit.v
+
+<span class="comment"># Lint multiple files</span>
+<span class="cmd">verilator</span> <span class="flag">--lint-only -Wall</span> rtl/mac_unit.v rtl/mac_array.v</pre>
+
+<div class="success">
+    <strong>Success:</strong> No output = no errors. Silence is good.
+</div>
+
+<div class="danger">
+    <strong>Errors:</strong> Fix everything it complains about. Common ones:<br>
+    • <code>WIDTHEXPAND</code> — assigning smaller signal to larger one (might need sign extension)<br>
+    • <code>UNSIGNED</code> — mixing signed and unsigned signals<br>
+    • <code>UNUSED</code> — declared a signal but never used it<br>
+    • <code>UNDRIVEN</code> — using a signal that nothing drives
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<h2><span class="step-number">3</span> Simulate (Icarus Verilog + cocotb)</h2>
+
+<p>Runs your Verilog against the Python testbench. Shows PASS/FAIL for each test.</p>
+
+<pre><span class="comment"># Run all tests for a module</span>
+<span class="cmd">cd</span> tb && <span class="cmd">make</span>
+
+<span class="comment"># Run a specific test only</span>
+<span class="cmd">cd</span> tb && <span class="cmd">make</span> <span class="flag">TESTCASE=test_basic_multiply</span>
+
+<span class="comment"># Clean simulation files and rerun</span>
+<span class="cmd">cd</span> tb && <span class="cmd">make</span> <span class="flag">clean</span> && <span class="cmd">make</span></pre>
+
+<div class="success">
+    <strong>Success:</strong> All tests show PASS. Output ends with something like <code>passed X of X tests</code>.
+</div>
+
+<div class="danger">
+    <strong>Failure:</strong> Shows expected vs actual value. Go check your Verilog logic. Use waveforms (step 4) to debug.
+</div>
+
+<div class="note">
+    <strong>What's happening:</strong> Icarus Verilog compiles your <code>.v</code> file into a simulation. cocotb (Python) drives the inputs and checks the outputs. The Makefile ties them together.
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<h2><span class="step-number">4</span> View Waveforms (Surfer)</h2>
+
+<p>Visual debugger. See every signal's value at every clock cycle. Use this when tests fail.</p>
+
+<pre><span class="comment"># Open the waveform file generated by simulation</span>
+<span class="cmd">surfer</span> tb/sim_build/dump.fst
+
+<span class="comment"># If the file is .vcd instead</span>
+<span class="cmd">surfer</span> tb/sim_build/mac_unit.vcd</pre>
+
+<div class="note">
+    <strong>How to use Surfer:</strong><br>
+    • Left panel: list of signals in your design<br>
+    • Drag signals to the main view to see their waveforms<br>
+    • Zoom in/out to see individual clock cycles<br>
+    • Click on a time point to read exact signal values<br>
+    • Look for where expected vs actual values diverge
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<h2><span class="step-number">5</span> Resource Estimate (Yosys)</h2>
+
+<p>Tells you how many LEs, multipliers, and memory blocks your design uses. Quick budget check.</p>
+
+<pre><span class="comment"># Basic resource count</span>
+<span class="cmd">yosys</span> <span class="flag">-p</span> "read_verilog rtl/mac_unit.v; synth; stat"
+
+<span class="comment"># Quieter output (just the stats)</span>
+<span class="cmd">yosys</span> <span class="flag">-p</span> "read_verilog rtl/mac_unit.v; synth; stat" <span class="flag">2>&1 | grep -A 20 "Printing statistics"</span>
+
+<span class="comment"># Multiple files</span>
+<span class="cmd">yosys</span> <span class="flag">-p</span> "read_verilog rtl/mac_unit.v rtl/mac_array.v; synth; stat"</pre>
+
+<div class="note">
+    <strong>What to look for in output:</strong><br>
+    • <code>$mul</code> — multiplier blocks used<br>
+    • <code>$add</code> — adder cells<br>
+    • <code>Number of cells</code> — rough LE estimate<br>
+    • <code>SB_DFF</code> or <code>DFF</code> — flip-flops (registers)<br>
+    <br>
+    <strong>Our budget:</strong> 114,480 LEs, 266 multiplier blocks, 432 M9K BRAM blocks
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<h2><span class="step-number">6</span> Git Commit</h2>
+
+<p>Only after the module passes all tests.</p>
+
+<pre><span class="comment"># Check what changed</span>
+<span class="cmd">git</span> status
+<span class="cmd">git</span> diff
+
+<span class="comment"># Stage and commit</span>
+<span class="cmd">git</span> add rtl/mac_unit.v tb/test_mac_unit.py tb/Makefile
+<span class="cmd">git</span> commit -m "feat: add MAC unit with passing testbench"
+
+<span class="comment"># See commit history</span>
+<span class="cmd">git</span> log --oneline</pre>
+
+<!-- ════════════════════════════════════════ -->
+<h2>Quick Reference Table</h2>
+
+<table>
+    <tr><th>Step</th><th>Tool</th><th>Command</th><th>Good Output</th></tr>
+    <tr>
+        <td>Lint</td>
+        <td>Verilator</td>
+        <td><code>verilator --lint-only -Wall rtl/file.v</code></td>
+        <td>No output (silence)</td>
+    </tr>
+    <tr>
+        <td>Simulate</td>
+        <td>Icarus + cocotb</td>
+        <td><code>cd tb && make</code></td>
+        <td>All PASS</td>
+    </tr>
+    <tr>
+        <td>Waveforms</td>
+        <td>Surfer</td>
+        <td><code>surfer tb/sim_build/dump.fst</code></td>
+        <td>GUI opens</td>
+    </tr>
+    <tr>
+        <td>Resources</td>
+        <td>Yosys</td>
+        <td><code>yosys -p "read_verilog rtl/file.v; synth; stat"</code></td>
+        <td>Stats printed</td>
+    </tr>
+    <tr>
+        <td>Commit</td>
+        <td>Git</td>
+        <td><code>git add ... && git commit -m "..."</code></td>
+        <td>Commit hash shown</td>
+    </tr>
+</table>
+
+</body>
+</html>

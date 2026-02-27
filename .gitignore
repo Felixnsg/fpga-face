@@ -1,0 +1,24 @@
+# Simulation outputs
+sim/
+tb/sim_build/
+tb/results.xml
+tb/__pycache__/
+*.vcd
+*.fst
+*.lxt
+
+# Quartus (school)
+db/
+incremental_db/
+output_files/
+*.qpf
+*.qsf
+*.sof
+*.pof
+
+# Yosys
+*.blif
+*.json
+
+# OS
+.DS_Store

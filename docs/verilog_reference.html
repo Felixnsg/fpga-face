@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verilog Quick Reference</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Mono', 'Fira Code', monospace;
+            background: #0d1117;
+            color: #c9d1d9;
+            padding: 2rem;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #58a6ff;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 0.5rem;
+        }
+        .subtitle {
+            color: #8b949e;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+        h2 {
+            color: #79c0ff;
+            font-size: 1.2rem;
+            margin-top: 2rem;
+            margin-bottom: 0.8rem;
+            padding: 0.3rem 0.6rem;
+            background: #161b22;
+            border-left: 3px solid #58a6ff;
+        }
+        h3 {
+            color: #d2a8ff;
+            font-size: 1rem;
+            margin-top: 1.2rem;
+            margin-bottom: 0.4rem;
+        }
+        pre {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 0.6rem 0 1rem 0;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+        code {
+            color: #f0883e;
+            font-size: 0.85rem;
+        }
+        .keyword { color: #ff7b72; }
+        .type { color: #79c0ff; }
+        .string { color: #a5d6ff; }
+        .comment { color: #8b949e; font-style: italic; }
+        .number { color: #79c0ff; }
+        .signal { color: #7ee787; }
+        p {
+            margin: 0.4rem 0;
+            color: #c9d1d9;
+        }
+        .note {
+            background: #1c2128;
+            border: 1px solid #f0883e;
+            border-radius: 6px;
+            padding: 0.8rem 1rem;
+            margin: 0.8rem 0;
+            font-size: 0.85rem;
+        }
+        .note strong { color: #f0883e; }
+        .danger {
+            border-color: #f85149;
+        }
+        .danger strong { color: #f85149; }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 0.6rem 0;
+        }
+        .grid pre { margin: 0; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0.8rem 0;
+            font-size: 0.85rem;
+        }
+        th {
+            background: #161b22;
+            color: #58a6ff;
+            text-align: left;
+            padding: 0.5rem 0.8rem;
+            border: 1px solid #30363d;
+        }
+        td {
+            padding: 0.5rem 0.8rem;
+            border: 1px solid #30363d;
+        }
+        .toc {
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .toc a {
+            color: #58a6ff;
+            text-decoration: none;
+            display: block;
+            padding: 0.15rem 0;
+        }
+        .toc a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+
+<h1>Verilog Quick Reference</h1>
+<p class="subtitle">Everything you need for the FPGA accelerator project. Keep this open while coding.</p>
+
+<div class="toc">
+    <strong>Sections:</strong>
+    <a href="#module">1. Module Declaration</a>
+    <a href="#types">2. Wire vs Reg</a>
+    <a href="#assign">3. Assign (Combinational)</a>
+    <a href="#always-comb">4. Always Block (Combinational)</a>
+    <a href="#always-clk">5. Always Block (Clocked)</a>
+    <a href="#signed">6. Signed Numbers</a>
+    <a href="#bits">7. Bit Widths &amp; Ranges</a>
+    <a href="#signext">8. Sign Extension</a>
+    <a href="#operators">9. Operators</a>
+    <a href="#ternary">10. Ternary (Mux)</a>
+    <a href="#instantiate">11. Module Instantiation</a>
+    <a href="#fsm">12. State Machines</a>
+    <a href="#params">13. Parameters</a>
+    <a href="#literals">14. Number Literals</a>
+    <a href="#gotchas">15. Common Gotchas</a>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<h2 id="module">1. Module Declaration</h2>
+
+<p>The outer shell of any hardware block. Lists all inputs and outputs.</p>
+
+<pre><span class="keyword">module</span> <span class="signal">mac_unit</span> (
+    <span class="keyword">input</span>  <span class="type">wire</span>                <span class="signal">clk</span>,            <span class="comment">// 1-bit clock</span>
+    <span class="keyword">input</span>  <span class="type">wire</span>                <span class="signal">load_weight</span>,    <span class="comment">// 1-bit control signal</span>
+    <span class="keyword">input</span>  <span class="type">wire signed</span> [7:0]   <span class="signal">weight_in</span>,      <span class="comment">// 8-bit signed input</span>
+    <span class="keyword">input</span>  <span class="type">wire signed</span> [7:0]   <span class="signal">activation_in</span>,  <span class="comment">// 8-bit signed input</span>
+    <span class="keyword">input</span>  <span class="type">wire signed</span> [31:0]  <span class="signal">psum_in</span>,        <span class="comment">// 32-bit signed input</span>
+    <span class="keyword">output</span> <span class="type">wire signed</span> [31:0]  <span class="signal">psum_out</span>,       <span class="comment">// 32-bit signed output</span>
+    <span class="keyword">output</span> <span class="type">wire signed</span> [7:0]   <span class="signal">activation_out</span>  <span class="comment">// 8-bit passthrough</span>
+);
+
+    <span class="comment">// internals go here</span>
+
+<span class="keyword">endmodule</span></pre>
+
+<div class="note">
+    <strong>Note:</strong> No comma after the last port. No semicolon after the port list closing parenthesis — the semicolon goes after <code>)</code>.
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<h2 id="types">2. Wire vs Reg</h2>
+
+<p><code>wire</code> — a connection. No storage. Value is always driven by something.</p>
+<p><code>reg</code> — can hold a value. Used inside <code>always</code> blocks. Becomes a flip-flop when used with a clock.</p>
+
+<div class="grid">
+<pre><span class="comment">// Wire: just a connection</span>
+<span class="type">wire</span> [15:0] <span class="signal">product</span>;
+<span class="keyword">assign</span> <span class="signal">product</span> = a * b;</pre>
+
+<pre><span class="comment">// Reg: stores a value</span>
+<span class="type">reg</span> [7:0] <span class="signal">weight_reg</span>;
+<span class="comment">// assigned inside always block</span></pre>
+</div>
+
+<div class="note danger">
+    <strong>Rule:</strong> If you drive a signal with <code>assign</code>, declare it as <code>wire</code>. If you drive it inside an <code>always</code> block, declare it as <code>reg</code>. Mixing these up = compiler error.
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<h2 id="assign">3. Assign (Combinational Logic)</h2>
+
+<p>Creates a permanent connection. Output updates instantly when inputs change. No clock.</p>
+
+<pre><span class="comment">// These run ALL THE TIME, in parallel</span>
+<span class="keyword">assign</span> <span class="signal">sum</span>         = a + b;
+<span class="keyword">assign</span> <span class="signal">is_negative</span> = (value[31] == 1'b1);
+<span class="keyword">assign</span> <span class="signal">data_out</span>    = data_in;  <span class="comment">// passthrough — just a wire</span></pre>
+
+<!-- ════════════════════════════════════════ -->
+<h2 id="always-comb">4. Always Block — Combinational</h2>
+
+<p>Alternative to <code>assign</code> for more complex combinational logic. Uses blocking <code>=</code>.</p>
+
+<pre><span class="keyword">always</span> @(*) <span class="keyword">begin</span>
+    <span class="keyword">if</span> (select)
+        <span class="signal">out</span> = a;
+    <span class="keyword">else</span>
+        <span class="signal">out</span> = b;
+<span class="keyword">end</span></pre>
+
+<div class="note">
+    <strong>@(*)</strong> means "recalculate whenever ANY input changes." Use blocking <code>=</code> here.
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<h2 id="always-clk">5. Always Block — Clocked (Sequential)</h2>
+
+<p>Updates on clock edge only. Creates flip-flops. Uses non-blocking <code>&lt;=</code>.</p>
+
+<pre><span class="keyword">always</span> @(<span class="keyword">posedge</span> <span class="signal">clk</span>) <span class="keyword">begin</span>
+    <span class="keyword">if</span> (load)
+        <span class="signal">weight_reg</span> &lt;= <span class="signal">weight_in</span>;   <span class="comment">// store new value on clock edge</span>
+    <span class="comment">// else: weight_reg keeps its old value automatically</span>
+<span class="keyword">end</span></pre>
+
+<div class="note danger">
+    <strong>Critical:</strong> Use <code>&lt;=</code> (non-blocking) in clocked blocks. Use <code>=</code> (blocking) in combinational blocks. Mixing them up causes simulation bugs.
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<h2 id="signed">6. Signed Numbers</h2>
+
+<p>By default, Verilog treats everything as unsigned. You MUST declare <code>signed</code> for INT8 math.</p>
+
+<pre><span class="type">wire signed</span> [7:0] <span class="signal">a</span>;       <span class="comment">// range: -128 to +127</span>
+<span class="type">wire</span>        [7:0] <span class="signal">b</span>;       <span class="comment">// range: 0 to 255 (WRONG for INT8!)</span>
+
+<span class="comment">// $signed() forces signed interpretation</span>
+<span class="keyword">assign</span> <span class="signal">product</span> = $signed(<span class="signal">a</span>) * $signed(<span class="signal">b</span>);</pre>
+
+<div class="note danger">
+    <strong>Bug #3:</strong> Forgetting <code>signed</code> turns -3 into 253. Your entire model outputs garbage. Always declare INT8 signals as <code>signed</code>.
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<h2 id="bits">7. Bit Widths &amp; Ranges</h2>
+
+<table>
+    <tr><th>Declaration</th><th>Bits</th><th>Signed Range</th><th>Unsigned Range</th></tr>
+    <tr><td><code>[7:0]</code></td><td>8</td><td>-128 to 127</td><td>0 to 255</td></tr>
+    <tr><td><code>[15:0]</code></td><td>16</td><td>-32,768 to 32,767</td><td>0 to 65,535</td></tr>
+    <tr><td><code>[31:0]</code></td><td>32</td><td>-2.1B to 2.1B</td><td>0 to 4.3B</td></tr>
+</table>
+
+<p>Access individual bits:</p>
+<pre><span class="signal">data</span>[7]      <span class="comment">// single bit (the MSB / sign bit)</span>
+<span class="signal">data</span>[3:0]    <span class="comment">// lower 4 bits</span>
+<span class="signal">data</span>[7:4]    <span class="comment">// upper 4 bits</span></pre>
+
+<!-- ════════════════════════════════════════ -->
+<h2 id="signext">8. Sign Extension</h2>
+
+<p>Expanding a smaller signed number to a larger width. Critical for MAC unit.</p>
+
+<pre><span class="type">wire signed</span> [15:0] <span class="signal">product</span>;     <span class="comment">// 16-bit from multiplier</span>
+<span class="type">wire signed</span> [31:0] <span class="signal">product_ext</span>; <span class="comment">// 32-bit for adder</span>
+
+<span class="comment">// Method 1: If both declared as signed, Verilog does it automatically</span>
+<span class="keyword">assign</span> <span class="signal">product_ext</span> = <span class="signal">product</span>;   <span class="comment">// auto sign-extends if signed</span>
+
+<span class="comment">// Method 2: Manual sign extension (copies sign bit 16 times)</span>
+<span class="keyword">assign</span> <span class="signal">product_ext</span> = {{16{<span class="signal">product</span>[15]}}, <span class="signal">product</span>};
+<span class="comment">//                    ^^^^^^^^^^^^^^^^  ^^^^^^^^</span>
+<span class="comment">//                    16 copies of       original</span>
+<span class="comment">//                    the sign bit       16 bits</span></pre>
+
+<div class="note">
+    <strong>Tip:</strong> If everything is declared <code>signed</code>, Verilog handles sign extension automatically on assignment. But it's good to know the manual way.
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<h2 id="operators">9. Operators</h2>
+
+<table>
+    <tr><th>Operator</th><th>What</th><th>Example</th></tr>
+    <tr><td><code>+</code></td><td>Add</td><td><code>a + b</code></td></tr>
+    <tr><td><code>-</code></td><td>Subtract</td><td><code>a - b</code></td></tr>
+    <tr><td><code>*</code></td><td>Multiply</td><td><code>a * b</code> (uses hard block)</td></tr>
+    <tr><td><code>&amp;</code></td><td>Bitwise AND</td><td><code>a &amp; b</code></td></tr>
+    <tr><td><code>|</code></td><td>Bitwise OR</td><td><code>a | b</code></td></tr>
+    <tr><td><code>^</code></td><td>Bitwise XOR</td><td><code>a ^ b</code></td></tr>
+    <tr><td><code>~</code></td><td>Bitwise NOT</td><td><code>~a</code></td></tr>
+    <tr><td><code>&lt;&lt;</code></td><td>Shift left</td><td><code>a &lt;&lt; 3</code></td></tr>
+    <tr><td><code>&gt;&gt;&gt;</code></td><td>Arithmetic shift right</td><td><code>a &gt;&gt;&gt; 3</code> (preserves sign)</td></tr>
+    <tr><td><code>&gt;&gt;</code></td><td>Logical shift right</td><td><code>a &gt;&gt; 3</code> (fills with 0s)</td></tr>
+    <tr><td><code>==</code></td><td>Equal</td><td><code>a == b</code></td></tr>
+    <tr><td><code>!=</code></td><td>Not equal</td><td><code>a != b</code></td></tr>
+    <tr><td><code>? :</code></td><td>Ternary mux</td><td><code>sel ? a : b</code></td></tr>
+</table>
+
+<!-- ════════════════════════════════════════ -->
+<h2 id="ternary">10. Ternary (Multiplexer)</h2>
+
+<p>Selects between two values based on a condition. Creates a MUX in hardware.</p>
+
+<pre><span class="comment">// If condition is true, use a. Otherwise, use b.</span>
+<span class="keyword">assign</span> <span class="signal">out</span> = (condition) ? a : b;
+
+<span class="comment">// Example: clear the accumulator or keep adding</span>
+<span class="keyword">assign</span> <span class="signal">next_acc</span> = (clear) ? <span class="number">32'd0</span> : (<span class="signal">acc</span> + <span class="signal">product</span>);</pre>
+
+<!-- ════════════════════════════════════════ -->
+<h2 id="instantiate">11. Module Instantiation</h2>
+
+<p>Using a module inside another module. Like calling a function, but it creates physical hardware.</p>
+
+<pre><span class="comment">// Create one instance of mac_unit called "mac0"</span>
+<span class="signal">mac_unit</span> mac0 (
+    .clk(<span class="signal">clk</span>),
+    .load_weight(<span class="signal">load_signal</span>),
+    .weight_in(<span class="signal">w_data</span>),
+    .activation_in(<span class="signal">act_data</span>),
+    .psum_in(<span class="number">32'd0</span>),           <span class="comment">// leftmost MAC, no previous sum</span>
+    .psum_out(<span class="signal">result</span>),
+    .activation_out(<span class="signal">act_pass</span>)
+);
+
+<span class="comment">// Create another — two separate circuits, both running in parallel</span>
+<span class="signal">mac_unit</span> mac1 (
+    .clk(<span class="signal">clk</span>),
+    .psum_in(<span class="signal">result</span>),          <span class="comment">// chained! mac0's output → mac1's input</span>
+    <span class="comment">// ... etc</span>
+);</pre>
+
+<!-- ════════════════════════════════════════ -->
+<h2 id="fsm">12. State Machines (FSM)</h2>
+
+<p>How you make things happen in sequence in hardware.</p>
+
+<pre><span class="comment">// Define states</span>
+<span class="keyword">localparam</span> IDLE    = 2'd0;
+<span class="keyword">localparam</span> LOAD    = 2'd1;
+<span class="keyword">localparam</span> COMPUTE = 2'd2;
+<span class="keyword">localparam</span> DONE    = 2'd3;
+
+<span class="type">reg</span> [1:0] <span class="signal">state</span>;
+
+<span class="keyword">always</span> @(<span class="keyword">posedge</span> <span class="signal">clk</span>) <span class="keyword">begin</span>
+    <span class="keyword">case</span> (<span class="signal">state</span>)
+        IDLE:    <span class="signal">state</span> &lt;= LOAD;
+        LOAD:    <span class="keyword">if</span> (load_done)    <span class="signal">state</span> &lt;= COMPUTE;
+        COMPUTE: <span class="keyword">if</span> (compute_done) <span class="signal">state</span> &lt;= DONE;
+        DONE:    <span class="signal">state</span> &lt;= IDLE;
+    <span class="keyword">endcase</span>
+<span class="keyword">end</span></pre>
+
+<!-- ════════════════════════════════════════ -->
+<h2 id="params">13. Parameters</h2>
+
+<p>Constants that make modules reusable with different sizes.</p>
+
+<pre><span class="keyword">module</span> <span class="signal">mac_unit</span> #(
+    <span class="keyword">parameter</span> DATA_WIDTH = 8,
+    <span class="keyword">parameter</span> ACC_WIDTH  = 32
+)(
+    <span class="keyword">input</span> <span class="type">wire signed</span> [DATA_WIDTH-1:0] <span class="signal">weight_in</span>,
+    <span class="keyword">input</span> <span class="type">wire signed</span> [ACC_WIDTH-1:0]  <span class="signal">psum_in</span>,
+    <span class="comment">// ...</span>
+);</pre>
+
+<!-- ════════════════════════════════════════ -->
+<h2 id="literals">14. Number Literals</h2>
+
+<table>
+    <tr><th>Literal</th><th>Meaning</th></tr>
+    <tr><td><code>8'd5</code></td><td>8-bit decimal 5</td></tr>
+    <tr><td><code>8'b0000_0101</code></td><td>8-bit binary 5 (underscores for readability)</td></tr>
+    <tr><td><code>8'hFF</code></td><td>8-bit hex 255</td></tr>
+    <tr><td><code>32'd0</code></td><td>32-bit zero</td></tr>
+    <tr><td><code>1'b0</code></td><td>single bit, value 0</td></tr>
+    <tr><td><code>1'b1</code></td><td>single bit, value 1</td></tr>
+</table>
+
+<div class="note">
+    <strong>Format:</strong> <code>[bit_width]'[base][value]</code> where base is <code>d</code>=decimal, <code>b</code>=binary, <code>h</code>=hex.
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<h2 id="gotchas">15. Common Gotchas</h2>
+
+<div class="note danger">
+    <strong>1. = vs &lt;=</strong><br>
+    Use <code>=</code> in combinational (<code>assign</code>, <code>always @(*)</code>).<br>
+    Use <code>&lt;=</code> in clocked (<code>always @(posedge clk)</code>).<br>
+    Mix them up → simulation behaves differently from real hardware.
+</div>
+
+<div class="note danger">
+    <strong>2. Forgetting signed</strong><br>
+    <code>wire [7:0] x = 8'hFF;</code> → x is 255 (unsigned)<br>
+    <code>wire signed [7:0] x = 8'hFF;</code> → x is -1 (signed)<br>
+    For INT8 neural network math, EVERYTHING must be <code>signed</code>.
+</div>
+
+<div class="note danger">
+    <strong>3. Width mismatches</strong><br>
+    Adding an 8-bit and 32-bit number without sign extension → upper bits are garbage.<br>
+    Always match widths explicitly or let <code>signed</code> handle it.
+</div>
+
+<div class="note">
+    <strong>4. No comma after last port</strong><br>
+    The last signal in a module port list has NO comma. Compiler error if you add one.
+</div>
+
+<div class="note">
+    <strong>5. Undriven signals</strong><br>
+    If you declare a <code>reg</code> but never assign it in an <code>always</code> block, it holds <code>x</code> (unknown) in simulation. Make sure every <code>reg</code> gets assigned in all paths.
+</div>
+
+</body>
+</html>
