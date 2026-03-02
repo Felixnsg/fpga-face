@@ -1,0 +1,12 @@
+SIM ?= icarus
+TOPLEVEL_LANG ?= verilog
+
+VERILOG_SOURCES = $(shell pwd)/../rtl/requant_unit.v
+
+TOPLEVEL = requant_unit
+
+COCOTB_TEST_MODULES = test_requant_unit
+
+WAVES = 1
+
+include $(shell cocotb-config --makefiles)/Makefile.sim
