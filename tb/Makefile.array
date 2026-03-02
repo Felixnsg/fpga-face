@@ -1,0 +1,12 @@
+SIM ?= icarus
+TOPLEVEL_LANG ?= verilog
+
+VERILOG_SOURCES = $(shell pwd)/../rtl/mac_unit.v $(shell pwd)/../rtl/mac_array.v
+
+TOPLEVEL = mac_array
+
+COCOTB_TEST_MODULES = test_mac_array
+
+WAVES = 1
+
+include $(shell cocotb-config --makefiles)/Makefile.sim

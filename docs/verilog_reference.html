@@ -330,6 +330,28 @@
     <span class="comment">// ... etc</span>
 );</pre>
 
+<p><strong>Generate loops</strong> — instantiate many copies with a loop. Each gets unique wires.</p>
+
+<pre><span class="comment">// Declare wires for connections between MACs</span>
+<span class="type">wire</span> <span class="keyword">signed</span> [31:0] <span class="signal">psum_wire</span> [0:2];  <span class="comment">// array of 3 wires, 32 bits each</span>
+
+<span class="comment">// Generate 3 MACs in a chain</span>
+<span class="keyword">genvar</span> i;
+<span class="keyword">generate</span>
+    <span class="keyword">for</span> (i = 0; i &lt; 3; i = i + 1) <span class="keyword">begin</span> : <span class="signal">col</span>
+        <span class="signal">mac_unit</span> mac (
+            .clk(<span class="signal">clk</span>),
+            .PSUM_in(i == 0 ? <span class="number">32'd0</span> : <span class="signal">psum_wire</span>[i-1]),  <span class="comment">// first MAC gets 0</span>
+            .PSUM_out(<span class="signal">psum_wire</span>[i])
+            <span class="comment">// ... other ports</span>
+        );
+    <span class="keyword">end</span>
+<span class="keyword">endgenerate</span>
+
+<span class="comment">// 2D wire arrays (for a grid)</span>
+<span class="type">wire</span> <span class="keyword">signed</span> [31:0] <span class="signal">psum_w</span> [0:15][0:16];  <span class="comment">// [row][col] — 16 rows, 17 columns (in + out)</span>
+<span class="type">wire</span> <span class="keyword">signed</span> [7:0]  <span class="signal">act_w</span>  [0:15][0:16];  <span class="comment">// same idea for activations</span></pre>
+
 <!-- ════════════════════════════════════════ -->
 <h2 id="fsm">12. State Machines (FSM)</h2>
 
