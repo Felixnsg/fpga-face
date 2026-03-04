@@ -134,4 +134,4 @@
 ---
 
 ## Current Position
-**Phase 1, Step 1.1** — Design understanding of a single MAC unit.
+**Phase 4** — SDRAM controller. Phases 1-3 complete and passing all tests.

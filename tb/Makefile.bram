@@ -1,0 +1,12 @@
+SIM ?= icarus
+TOPLEVEL_LANG ?= verilog
+
+VERILOG_SOURCES = $(shell pwd)/../rtl/bram_buffer.v
+
+TOPLEVEL = bram_buffer
+
+COCOTB_TEST_MODULES = test_bram_buffer
+
+WAVES = 1
+
+include $(shell cocotb-config --makefiles)/Makefile.sim

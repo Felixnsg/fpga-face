@@ -26,6 +26,7 @@ FPGA-based neural network accelerator for MobileFaceNet + BlazeFace face recogni
 6. **Golden reference first** — Write Python expected output BEFORE testing the Verilog.
 7. **Git after every working module** — Commit when a module passes its testbench. Never break main.
 8. **Simulation before synthesis** — Prove design in simulation on Mac before Quartus at school.
+9. **Research-driven decisions** — Architecture and design choices must reference the research (memory files: fpga_research_round1.md, fpga_research_round2.md). Don't reinvent what the research already solved.
 
 ## Directory Structure
 ```
