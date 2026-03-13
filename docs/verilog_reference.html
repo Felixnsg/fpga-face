@@ -357,6 +357,7 @@
 
 <p>How you make things happen in sequence in hardware.</p>
 
+<h3>Simple style (one block)</h3>
 <pre><span class="comment">// Define states</span>
 <span class="keyword">localparam</span> IDLE    = 2'd0;
 <span class="keyword">localparam</span> LOAD    = 2'd1;
@@ -373,6 +374,57 @@
         DONE:    <span class="signal">state</span> &lt;= IDLE;
     <span class="keyword">endcase</span>
 <span class="keyword">end</span></pre>
+
+<h3>Two-block style (recommended for complex FSMs)</h3>
+<p>Separates state register (clocked) from logic (combinational). Cleaner, easier to debug.</p>
+
+<pre><span class="keyword">localparam</span> IDLE    = 3'd0;
+<span class="keyword">localparam</span> REQUEST = 3'd1;
+<span class="keyword">localparam</span> WAIT    = 3'd2;
+<span class="keyword">localparam</span> BURST   = 3'd3;
+<span class="keyword">localparam</span> DONE_ST = 3'd4;
+
+<span class="type">reg</span> [2:0] <span class="signal">state</span>, <span class="signal">next_state</span>;
+
+<span class="comment">// Block 1: state register (sequential — uses <=)</span>
+<span class="keyword">always</span> @(<span class="keyword">posedge</span> <span class="signal">clk</span>) <span class="keyword">begin</span>
+    <span class="keyword">if</span> (<span class="signal">rst</span>)
+        <span class="signal">state</span> &lt;= IDLE;
+    <span class="keyword">else</span>
+        <span class="signal">state</span> &lt;= <span class="signal">next_state</span>;
+<span class="keyword">end</span>
+
+<span class="comment">// Block 2: next state + outputs (combinational — uses =)</span>
+<span class="keyword">always</span> @(*) <span class="keyword">begin</span>
+    <span class="comment">// DEFAULTS — safe values, prevent latches</span>
+    <span class="signal">next_state</span> = <span class="signal">state</span>;   <span class="comment">// stay in same state unless changed</span>
+    <span class="signal">enable</span>     = 1'b0;    <span class="comment">// all outputs low by default</span>
+    <span class="signal">done</span>       = 1'b0;
+
+    <span class="keyword">case</span> (<span class="signal">state</span>)
+        IDLE: <span class="keyword">begin</span>
+            <span class="keyword">if</span> (<span class="signal">start</span>)
+                <span class="signal">next_state</span> = REQUEST;
+        <span class="keyword">end</span>
+        REQUEST: <span class="keyword">begin</span>
+            <span class="signal">enable</span> = 1'b1;          <span class="comment">// output HIGH in this state</span>
+            <span class="keyword">if</span> (<span class="signal">ready</span>)
+                <span class="signal">next_state</span> = WAIT;
+        <span class="keyword">end</span>
+        DONE_ST: <span class="keyword">begin</span>
+            <span class="signal">done</span> = 1'b1;            <span class="comment">// pulse done for one cycle</span>
+            <span class="signal">next_state</span> = IDLE;      <span class="comment">// unconditional — go back</span>
+        <span class="keyword">end</span>
+    <span class="keyword">endcase</span>
+<span class="keyword">end</span></pre>
+
+<div class="note">
+    <strong>Key rules for two-block FSM:</strong><br>
+    1. Block 1 (clocked): ONLY updates <code>state &lt;= next_state</code> and any counters. Uses <code>&lt;=</code>.<br>
+    2. Block 2 (combinational): Sets <code>next_state</code> and ALL outputs. Uses <code>=</code>.<br>
+    3. ALWAYS set defaults at the top of block 2 — every output gets a safe value. Then override per state.<br>
+    4. Counters go in block 1 (they need the clock). Outputs go in block 2 (they're combinational).
+</div>
 
 <!-- ════════════════════════════════════════ -->
 <h2 id="params">13. Parameters</h2>

@@ -1,0 +1,12 @@
+SIM ?= icarus
+TOPLEVEL_LANG ?= verilog
+
+VERILOG_SOURCES = $(shell pwd)/../rtl/dma_engine.v
+
+TOPLEVEL = dma_engine
+
+COCOTB_TEST_MODULES = test_dma_engine
+
+WAVES = 1
+
+include $(shell cocotb-config --makefiles)/Makefile.sim

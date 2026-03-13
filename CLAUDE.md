@@ -27,6 +27,7 @@ FPGA-based neural network accelerator for MobileFaceNet + BlazeFace face recogni
 7. **Git after every working module** — Commit when a module passes its testbench. Never break main.
 8. **Simulation before synthesis** — Prove design in simulation on Mac before Quartus at school.
 9. **Research-driven decisions** — Architecture and design choices must reference the research (memory files: fpga_research_round1.md, fpga_research_round2.md). Don't reinvent what the research already solved.
+10. **Teach before asking** — Before asking Felix to write ANY module: (1) explain all new concepts needed, (2) define every signal/port with purpose and width, (3) walk through the complete behavior with examples, (4) cover BOTH transitions AND outputs for FSMs, (5) confirm Felix has the full picture. NEVER assume knowledge from a previous session — always recap. NEVER ask Felix to figure out something that hasn't been taught yet. Claude owns the lesson plan and must follow it completely.
 
 ## Directory Structure
 ```

@@ -1,7 +1,6 @@
 // BRAM Buffer — Dual-port RAM
 // Port A: write side (DMA / SDRAM speed)
 // Port B: read side (array / compute speed)
-// Felix writes this
 
 module bram_buffer #(
     parameter DATA_WIDTH = 16,

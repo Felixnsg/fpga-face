@@ -98,10 +98,34 @@
 
 ---
 
-## Phase 5: Multi-Layer Controller
-*Goal: Process multiple conv layers sequentially with layer parameters.*
+## Phase 5: DMA Engine + Multi-Layer Controller
+*Goal: FSM that fetches activation data from SDRAM into BRAM buffers, and a controller that orchestrates layer-by-layer inference.*
 
-(Detailed checkpoints TBD)
+### 5.1 DMA Engine — Design Understanding
+- [x] Felix draws FSM state diagram on paper (5 states: IDLE→REQUEST→WAIT→BURST→DONE)
+- [x] Define all transitions (what signal moves between each state)
+- [x] Define all outputs per state (what each state drives)
+- [x] Explain every port/signal with purpose, width, and direction
+- [ ] Felix understands the complete picture and is ready to write
+
+### 5.2 DMA Engine — Golden Reference (Claude writes)
+- [ ] Claude writes cocotb testbench with fake SDRAM model
+- [ ] Felix reviews and understands what the testbench checks
+
+### 5.3 DMA Engine — Write RTL (Felix writes)
+- [ ] Felix writes dma_engine.v — sequential always block (state register + counter)
+- [ ] Felix writes dma_engine.v — combinational always block (case statement with 5 states)
+- [ ] Review together: does this match the paper FSM?
+
+### 5.4 DMA Engine — Lint + Simulate + Waveforms + Commit
+
+### 5.5 Multi-Layer Controller — Design Understanding
+- [ ] Discuss what "layer parameters" the controller needs to store
+- [ ] Discuss how it sequences: load weights → load activations → compute → store results → next layer
+- [ ] Felix draws the FSM
+- [ ] Define all ports, transitions, and outputs
+
+### 5.6-5.8 Multi-Layer Controller — Golden ref, Write RTL, Lint/Sim/Commit
 
 ---
 
@@ -134,4 +158,4 @@
 ---
 
 ## Current Position
-**Phase 4** — SDRAM controller. Phases 1-3 complete and passing all tests.
+**Phase 5, Step 5.1** — DMA engine design. Phases 1-4 complete. FSM transitions and outputs defined. Felix ready to write Verilog.
