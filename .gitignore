@@ -29,6 +29,7 @@ docs/apply_tracker*.md
 
 # Local project notes (Claude collaboration notes, not for public repo)
 CLAUDE.md
+docs/roadmap.md
 
 # Stray PDFs at repo root (lab reports, etc. — put real docs in docs/ intentionally)
 /*.pdf
