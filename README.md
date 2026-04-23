@@ -2,8 +2,6 @@
 
 FPGA-based neural network accelerator for face recognition, targeting the Altera Cyclone IV EP4CE115 (DE2-115 board). Pipeline: camera -> BlazeFace detection -> crop -> MobileFaceNet recognition -> cosine similarity.
 
-Companion to [tinyml-face](https://github.com/Felixnsg/tinyml-face), which runs the same task on an ESP32.
-
 ## Status
 
 In progress. Five RTL modules complete and verified in simulation.
